@@ -1,0 +1,83 @@
+{"reports": 
+[
+    {
+        "accession":"GCA_003181115.1",
+        "annotation_info":{
+            "method":"Best-placed reference protein set; GeneMarkS+",
+            "name":"NCBI Prokaryotic Genome Annotation Pipeline (PGAP)",
+            "pipeline":"NCBI Prokaryotic Genome Annotation Pipeline (PGAP)",
+            "provider":"NCBI","release_date":"2018-05-24",
+            "software_version":"4.5",
+            "stats":{"gene_counts":{"non_coding":36,"protein_coding":457,"pseudogene":248,"total":741}}
+        },
+        "assembly_info":{
+            "assembly_level":"Contig",
+            "assembly_method":"Unicycler v. 0.4.4",
+            "assembly_name":"ASM318111v1",
+            "assembly_status":"current",
+            "assembly_type":"haploid",
+            "bioproject_accession":"PRJNA464391",
+            "bioproject_lineage":[{"bioprojects":[{"accession":"PRJNA464391","title":"'Brassica napus' phytoplasma isolate:TW1 Genome sequencing"}]}],
+            "biosample":{
+                "accession":"SAMN09083457",
+                "attributes":[
+                    {"name":"isolate","value":"TW1"},
+                    {"name":"host","value":"Brassica napus"},
+                    {"name":"isolation_source","value":"total DNA extraction from floral tissue of an infected plant"},
+                    {"name":"collection_date","value":"2017-08-15"},
+                    {"name":"geo_loc_name","value":"Canada: Saskatoon"},
+                    {"name":"sample_type","value":"metagenomic assembly"},
+                    {"name":"collected_by","value":"Tyler Wist"},
+                    {"name":"lat_lon","value":"52.155 N 106.57 W"},
+                    {"name":"environmental_sample","value":"TRUE"},
+                    {"name":"metagenomic","value":"TRUE"},
+                    {"name":"metagenome_source","value":"plant metagenome"},
+                    {"name":"note","value":"This BioSample is a metagenomic assembly obtained from the host Brassica napus BioSample: SAMN09222528."}
+                ],
+                "bioprojects":[{"accession":"PRJNA464391"}],
+                "collected_by":"Tyler Wist",
+                "collection_date":"2017-08-15",
+                "description":{"organism":{"organism_name":"'Brassica napus' phytoplasma","tax_id":469009},"title":"Microbe sample from 'Brassica napus' phytoplasma"},
+                "geo_loc_name":"Canada: Saskatoon",
+                "host":"Brassica napus",
+                "isolate":"TW1",
+                "isolation_source":"total DNA extraction from floral tissue of an infected plant",
+                "last_updated":"2021-02-28T05:49:56.078",
+                "lat_lon":"52.155 N 106.57 W",
+                "models":["Microbe, viral or environmental"],
+                "owner":{"contacts":[{}],"name":"Agriculture and Agri-Food Canada"},
+                "package":"Microbe.1.0",
+                "publication_date":"2018-05-07T00:00:00.000",
+                "sample_ids":[{"label":"Sample name","value":"Bn-AY TW1"},{"db":"SRA","value":"SRS3567565"}],
+                "status":{"status":"live","when":"2018-05-07T15:45:05.297"},
+                "submission_date":"2018-05-07T15:45:05.296"
+            },
+
+            "comments":"Annotation was added by the NCBI Prokaryotic Genome Annotation Pipeline (released 2013). Information about the Pipeline can be found here: https://www.ncbi.nlm.nih.gov/genome/annotation_prok/\nBacteria and source DNA available from Tim Dumonceaux.",
+            "genome_notes":["derived from metagenome"],"release_date":"2018-05-31","sequencing_tech":"Illumina MiSeq; Oxford nanopore MinIon",
+            "submitter":"Agriculture and Agri-Food Canada"},
+            "assembly_stats":{
+                "contig_l50":1,"contig_n50":373899,"gc_count":"202505","gc_percent":27,"genome_coverage":"146.0x",
+                "number_of_component_sequences":5,"number_of_contigs":5,"total_sequence_length":"743598","total_ungapped_length":"743598"
+                },
+            "average_nucleotide_identity":{
+                "best_ani_match":{
+                    "ani":89.1,"assembly":"GCA_032884575.1","assembly_coverage":1.34,"category":"suspected_type",
+                    "organism_name":"Candidatus Phytoplasma stylosanthis","type_assembly_coverage":1.9
+                    },
+                "category":"category_na","comment":"na","match_status":"low_coverage","submitted_organism":"'Brassica napus' phytoplasma",
+                "submitted_species":"'Brassica napus' phytoplasma","taxonomy_check_status":"Inconclusive"
+            },
+            "current_accession":"GCA_003181115.1",
+            "organism":{"infraspecific_names":{"isolate":"TW1"},"organism_name":"'Brassica napus' phytoplasma","tax_id":469009},
+            "source_database":"SOURCE_DATABASE_GENBANK",
+            "wgs_info":
+            {
+                "master_wgs_url":"https://www.ncbi.nlm.nih.gov/nuccore/QGKT00000000.1",
+                "wgs_contigs_url":"https://www.ncbi.nlm.nih.gov/Traces/wgs/QGKT01",
+                "wgs_project_accession":"QGKT01"
+            }
+        }
+    ],
+    "total_count": 1
+}
