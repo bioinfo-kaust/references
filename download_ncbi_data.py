@@ -120,7 +120,7 @@ def download_genome(species, output_dir, max_retries=3, file_types='genome,gtf')
         pass
     return (species, False)
 
-def get_species_names(search_term, max_results=100, accepted_divisions=['all']):
+def get_species_names(search_term, max_results=100):
     """
     Fetches a list of species names from NCBI datasets tool based on a search term.
     
@@ -150,44 +150,44 @@ def get_species_names(search_term, max_results=100, accepted_divisions=['all']):
         print(f"An error occurred: {e}")
         return []
 
-def fetch_ncbi_species(max_species, accepted_divisions, species_list_file):
+def fetch_ncbi_species(max_species, species_list_file=None, search_term='all', assembly_source='all', reference=True):
     """
     Fetch species names from NCBI datasets tool.
     
     Args:
         max_species (int): Maximum number of species to fetch.
-        accepted_divisions (list): List of accepted divisions.
         species_list_file (str): File name to store list of species from NCBI.
     
     Returns:
         list: List of species names.
     """
     try:
-        cmd = f"datasets summary genome taxon all --assembly-source all --limit {max_species}"
+        cmd = f"datasets summary genome taxon {search_term} --assembly-source {assembly_source} --limit {max_species} --as-json-lines"
+        if reference: #limit to reference genomes only
+            cmd+=' --reference'
+        
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         if result.returncode != 0:
             print(f"Error fetching species names: {result.stderr}")
             return []
-        
-        data = json.loads(result.stdout)['reports']
-        print(data)
+        data_sets = result.stdout.split('\n')
         species_list = []
-        with open(species_list_file, 'w') as species_list_outfile:
-            for genome in data:
-                print('genome data: ', genome)
-                species_name = genome['assembly_info']['assembly_name']
-                print(species_name)
+        
+        for genome in data_sets:
+            if genome:
+                species_name = json.loads(genome)['organism']['organism_name']
+                #species_name = genome['assembly_info']['assembly_name']
                 if species_name not in species_list:
                     species_list.append(species_name)
-                    species_list_outfile.write(species_name + '\n')
                 if len(species_list) >= max_species:
                     break
-        
-        return species_list
-
     except Exception as e:
         print(f"An error occurred: {e}")
-        return []
+
+    if species_list_file and species_list:
+        with open(species_list_file, 'w') as species_list_outfile:
+            species_list_outfile.write('\n'.join(list(set(species_list))))
+    return species_list
 
 def main():
     parser = argparse.ArgumentParser(description="Download genome and GTF files from NCBI for multiple species")
@@ -196,17 +196,18 @@ def main():
                         help="List of species names or taxon IDs")
     group.add_argument("-f", "--file", type=str, 
                         help="File containing species names or taxon IDs (one per line)")
-    group.add_argument("-st", "--search_term", type=str,
+    parser.add_argument("-st", "--search_term", type=str, default='all',
                         help="Search term to identify species name and if it exists")
+    parser.add_argument("-ar", "--assembly_source", type=str, default='all',
+                        help="Assembly resources to use (either RefSeq or GenBank or all (default))")
     group.add_argument("-l", "--list_all_species", action='store_true', default=False,
                         help="List all species available in NCBI")
-    group.add_argument("-ad", "--accepted_divisions", nargs="+", default=['all'],
-                        help="""List of accepted divisions including: 'Bacteria', 'Vertebrates', 'Invertebrates', 'Viruses', 'Environmental samples', 
-                            'Mammals', 'Synthetic and Chimeric', 'Unassigned', 'Phages', 'Plants and Fungi', 'Primates', 'Rodents'""")
-    
-    parser.add_argument("--species_list_file", default="species_list.txt", help="File name to save the list of species names when --list_all_species is enabled.")
+    parser.add_argument("-r", "--reference_only", action='store_true', default=True,
+                        help="All consider reference genomes, default True")
+    parser.add_argument("--species_list_file", default="ncbi_species_list.txt", 
+                        help="File name to save the list of species names when --list_all_species is enabled.")
     parser.add_argument("-d", "--download_species", action='store_true', default=False,
-                        help="Download species available in NCBI, limited by --search_term or --accepted_divisions")
+                        help="Download species available in NCBI")
     parser.add_argument("-m", "--max_species", type=int, default=1,
                         help="Maximum number of species to download (default: 10k)")
     parser.add_argument("-a", "--max_attempts", type=int, default=3,
@@ -223,14 +224,12 @@ def main():
     
     #list all species
     if args.list_all_species:
-        species = fetch_ncbi_species(args.max_species, args.accepted_divisions, args.species_list_file)
+        species = fetch_ncbi_species(
+                args.max_species, args.species_list_file, args.search_term, args.assembly_source, args.reference_only)
         print(f"Total species found: {len(species)}")
-        for s in species[:10]:
-            print(s)
-            sys.exit(0)
-
+    sys.exit(0)
     if args.search_term:
-        print('Species found:\n', '\n'.join(get_species_names(search_term=args.search_term, max_results=args.max_species, accepted_divisions=args.accepted_divisions)))
+        print('Species found:\n', '\n'.join(get_species_names(search_term=args.search_term, max_results=args.max_species)))
         if not args.download_species:
             sys.exit(0)
     
@@ -247,9 +246,12 @@ def main():
     elif args.file and os.path.isfile(args.file):
         species_list = [line.strip() for line in open(args.file, 'r').readlines() if line.strip() if line!=""]
     elif args.search_term and args.download_species:
-        species_list = get_species_names(search_term=args.search_term, max_results=args.max_species, accepted_divisions=args.accepted_divisions)
-    elif args.download_species and args.accepted_divisions!=['all']:
-        species_list = fetch_ncbi_species(args.max_species, args.accepted_divisions, args.species_list_file)
+        species_list = get_species_names(search_term=args.search_term, max_results=args.max_species)
+    elif args.download_species:
+        species_list = fetch_ncbi_species(
+            fetch_ncbi_species(
+                args.max_species, args.species_list_file, args.search_term, args.assembly_source, args.reference_only)
+        )
     else:
         print("Please provide a list of species or a file containing species names.")
         sys.exit(1)
@@ -266,7 +268,7 @@ def main():
     else:
         for spcies in species_list:
             results.append(download_genome(spcies, output_dir, args.max_attempts, ','.join(args.file_types)))
-    print(results)
+    #print(results)
 
 if __name__ == "__main__":
     main()
