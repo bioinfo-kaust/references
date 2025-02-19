@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-
-import sys
 import os
 import json
 import time
@@ -9,7 +7,6 @@ import zipfile
 import argparse
 import subprocess
 from pathlib import Path
-import concurrent.futures
 from multiprocessing import Pool
 
 def download_genome(species, output_dir, max_retries=3, file_types='genome,gtf'):
