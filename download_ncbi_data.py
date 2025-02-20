@@ -180,8 +180,8 @@ def main():
     
     parser.add_argument("--species_list_file", default="ncbi_species_list.txt", 
                         help="File name to save the list of species names.")
-    parser.add_argument("-o", "--output", type=str, default="genomes",
-                        help="Output directory (default: genomes)")
+    parser.add_argument("-o", "--output", type=str, default="ncbi_genomes",
+                        help="Output directory (default: ncbi_genomes)")
     parser.add_argument("-p", "--processes", type=int, default=1,
                         help="Number of parallel downloads (default: 1)")
     args = parser.parse_args()
@@ -205,9 +205,6 @@ def main():
         return []
     
     # Process species in parallel
-    successful = 0
-    failed = 0
-    failed_species = []
     results = []
     if args.processes>1:
         with Pool(processes=args.processes) as pool:
