@@ -1,83 +1,43 @@
-{"reports": 
-[
+{
+    "accession":"GCF_000001405.40",
+    "annotation_info":
     {
-        "accession":"GCA_003181115.1",
-        "annotation_info":{
-            "method":"Best-placed reference protein set; GeneMarkS+",
-            "name":"NCBI Prokaryotic Genome Annotation Pipeline (PGAP)",
-            "pipeline":"NCBI Prokaryotic Genome Annotation Pipeline (PGAP)",
-            "provider":"NCBI","release_date":"2018-05-24",
-            "software_version":"4.5",
-            "stats":{"gene_counts":{"non_coding":36,"protein_coding":457,"pseudogene":248,"total":741}}
-        },
-        "assembly_info":{
-            "assembly_level":"Contig",
-            "assembly_method":"Unicycler v. 0.4.4",
-            "assembly_name":"ASM318111v1",
-            "assembly_status":"current",
-            "assembly_type":"haploid",
-            "bioproject_accession":"PRJNA464391",
-            "bioproject_lineage":[{"bioprojects":[{"accession":"PRJNA464391","title":"'Brassica napus' phytoplasma isolate:TW1 Genome sequencing"}]}],
-            "biosample":{
-                "accession":"SAMN09083457",
-                "attributes":[
-                    {"name":"isolate","value":"TW1"},
-                    {"name":"host","value":"Brassica napus"},
-                    {"name":"isolation_source","value":"total DNA extraction from floral tissue of an infected plant"},
-                    {"name":"collection_date","value":"2017-08-15"},
-                    {"name":"geo_loc_name","value":"Canada: Saskatoon"},
-                    {"name":"sample_type","value":"metagenomic assembly"},
-                    {"name":"collected_by","value":"Tyler Wist"},
-                    {"name":"lat_lon","value":"52.155 N 106.57 W"},
-                    {"name":"environmental_sample","value":"TRUE"},
-                    {"name":"metagenomic","value":"TRUE"},
-                    {"name":"metagenome_source","value":"plant metagenome"},
-                    {"name":"note","value":"This BioSample is a metagenomic assembly obtained from the host Brassica napus BioSample: SAMN09222528."}
-                ],
-                "bioprojects":[{"accession":"PRJNA464391"}],
-                "collected_by":"Tyler Wist",
-                "collection_date":"2017-08-15",
-                "description":{"organism":{"organism_name":"'Brassica napus' phytoplasma","tax_id":469009},"title":"Microbe sample from 'Brassica napus' phytoplasma"},
-                "geo_loc_name":"Canada: Saskatoon",
-                "host":"Brassica napus",
-                "isolate":"TW1",
-                "isolation_source":"total DNA extraction from floral tissue of an infected plant",
-                "last_updated":"2021-02-28T05:49:56.078",
-                "lat_lon":"52.155 N 106.57 W",
-                "models":["Microbe, viral or environmental"],
-                "owner":{"contacts":[{}],"name":"Agriculture and Agri-Food Canada"},
-                "package":"Microbe.1.0",
-                "publication_date":"2018-05-07T00:00:00.000",
-                "sample_ids":[{"label":"Sample name","value":"Bn-AY TW1"},{"db":"SRA","value":"SRS3567565"}],
-                "status":{"status":"live","when":"2018-05-07T15:45:05.297"},
-                "submission_date":"2018-05-07T15:45:05.296"
-            },
-
-            "comments":"Annotation was added by the NCBI Prokaryotic Genome Annotation Pipeline (released 2013). Information about the Pipeline can be found here: https://www.ncbi.nlm.nih.gov/genome/annotation_prok/\nBacteria and source DNA available from Tim Dumonceaux.",
-            "genome_notes":["derived from metagenome"],"release_date":"2018-05-31","sequencing_tech":"Illumina MiSeq; Oxford nanopore MinIon",
-            "submitter":"Agriculture and Agri-Food Canada"},
-            "assembly_stats":{
-                "contig_l50":1,"contig_n50":373899,"gc_count":"202505","gc_percent":27,"genome_coverage":"146.0x",
-                "number_of_component_sequences":5,"number_of_contigs":5,"total_sequence_length":"743598","total_ungapped_length":"743598"
-                },
-            "average_nucleotide_identity":{
-                "best_ani_match":{
-                    "ani":89.1,"assembly":"GCA_032884575.1","assembly_coverage":1.34,"category":"suspected_type",
-                    "organism_name":"Candidatus Phytoplasma stylosanthis","type_assembly_coverage":1.9
-                    },
-                "category":"category_na","comment":"na","match_status":"low_coverage","submitted_organism":"'Brassica napus' phytoplasma",
-                "submitted_species":"'Brassica napus' phytoplasma","taxonomy_check_status":"Inconclusive"
-            },
-            "current_accession":"GCA_003181115.1",
-            "organism":{"infraspecific_names":{"isolate":"TW1"},"organism_name":"'Brassica napus' phytoplasma","tax_id":469009},
-            "source_database":"SOURCE_DATABASE_GENBANK",
-            "wgs_info":
-            {
-                "master_wgs_url":"https://www.ncbi.nlm.nih.gov/nuccore/QGKT00000000.1",
-                "wgs_contigs_url":"https://www.ncbi.nlm.nih.gov/Traces/wgs/QGKT01",
-                "wgs_project_accession":"QGKT01"
-            }
-        }
-    ],
-    "total_count": 1
+        "busco":{
+            "busco_lineage":"primates_odb10","busco_ver":"5.7.1","complete":0.9887518,"duplicated":0.009433962,
+            "fragmented":0.0045718434,"missing":0.0066763423,"single_copy":0.97931784,"total_count":"13780"},
+        "method":"Best-placed RefSeq; Gnomon; RefSeqFE; cmsearch; tRNAscan-SE","name":"GCF_000001405.40-RS_2024_08",
+        "pipeline":"NCBI eukaryotic genome annotation pipeline","provider":"NCBI RefSeq","release_date":"2024-08-23",
+        "report_url":"https://www.ncbi.nlm.nih.gov/genome/annotation_euk/Homo_sapiens/GCF_000001405.40-RS_2024_08.html",
+        "software_version":"10.3",
+        "stats":{"gene_counts":{"non_coding":22163,"other":411,"protein_coding":20078,"pseudogene":17063,"total":59715}},
+        "status":"Updated annotation"
+    },
+    "assembly_info":
+    {
+        "assembly_level":"Chromosome",
+        "assembly_name":"GRCh38.p14",
+        "assembly_status":"current","assembly_type":"haploid-with-alt-loci","bioproject_accession":"PRJNA31257",
+        "bioproject_lineage":[{"bioprojects":[{"accession":"PRJNA31257",
+                                            "title":"The Human Genome Project, currently maintained by the Genome Reference Consortium (GRC)"
+                                            }]}],
+        "blast_url":"https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastSearch\u0026PROG_DEF=blastn\u0026BLAST_SPEC=GDH_GCF_000001405.40",
+        "description":"Genome Reference Consortium Human Build 38 patch release 14 (GRCh38.p14)",
+        "paired_assembly":{"accession":"GCA_000001405.29","only_genbank":"4 unlocalized and unplaced scaffolds.","status":"current"},
+        "refseq_category":"reference genome","release_date":"2022-02-03","submitter":"Genome Reference Consortium","synonym":"hg38"
+    },
+    "assembly_stats":
+    {
+        "contig_l50":18,"contig_n50":57879411,"gaps_between_scaffolds_count":349,"gc_count":"1374283647","gc_percent":41,
+        "number_of_component_sequences":35611,"number_of_contigs":996,"number_of_organelles":1,"number_of_scaffolds":470,
+        "scaffold_l50":16,"scaffold_n50":67794873,"total_number_of_chromosomes":24,"total_sequence_length":"3099441038",
+        "total_ungapped_length":"2948318359"
+    },
+    "current_accession":"GCF_000001405.40",
+    "organelle_info":[{"description":"Mitochondrion","submitter":"Genome Reference Consortium","total_seq_length":"16569"}],
+    "organism":
+    {
+        "common_name":"human",
+        "organism_name":"Homo sapiens","tax_id":9606
+    },
+    "paired_accession":"GCA_000001405.29","source_database":"SOURCE_DATABASE_REFSEQ"
 }

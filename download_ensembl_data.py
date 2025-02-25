@@ -4,12 +4,10 @@ import time
 import gzip
 import random
 import ftplib
-import hashlib
 import logging
 import argparse
 import subprocess
 from pathlib import Path
-from urllib.parse import urljoin
 from multiprocessing import Pool
 
 def setup_logging():
@@ -45,10 +43,9 @@ def get_ftp_files(ftp, division, release, species, file_type, extra_dir=''):
     try:
         ftp.cwd(ftp_path)
     except Exception as e:
-        logging.error(f"Error accessing {file_type} directory: {str(e)}; path tried: {ftp_path}")
+        logging.error(f"Error accessing {file_type} directory: {str(e)}; path tried: {ftp.host}{ftp_path}. Check if the path and release number are correct!")
     
     return ftp.nlst(), ftp_path
-
 
 def download_file(ftp, remote_path, filename, local_dir, max_retries=3):
     """Download a file from FTP server"""
@@ -258,7 +255,7 @@ def main():
         for species in species_list:
             results.append(get_genome(species, server, args.file_types, args.division, 
                                       args.release, args.force_replace, args.dna_file_ext, args.output))
-    
+    logging.info(f"Downloaded files for {len(results)} species.")
     
     return results
 
