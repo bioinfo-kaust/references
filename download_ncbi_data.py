@@ -91,7 +91,7 @@ def download_genome(species, output_dir, max_retries=3, file_types='genome,gtf')
             if result.returncode == 0:
                 #Unzip downloaded folder that contains the files
                 zip_file =  species_dir / "ncbi_dataset.zip"
-                extract_path = species_dir 
+                extract_path = species_dir
                 try:
                     with zipfile.ZipFile(zip_file, 'r') as zip_ref:
                         zip_ref.extractall(extract_path)
