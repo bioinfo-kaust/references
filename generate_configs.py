@@ -35,7 +35,7 @@ def generate_reference_input_config(ensembl_dir: str = "ensembl_genomes",
             # Skip if this is the base directory itself
             for species in os.listdir(genome_base+'/'+division_dir):
                 fasta_files = []
-                species_dir = Path(genome_base) / division_dir / species
+                species_dir = Path(os.path.abspath(genome_base)) / division_dir / species
                 print('browsing species_dir', species_dir)
                 # Get the immediate parent directory name as the genome name
                 source = ''
@@ -59,17 +59,15 @@ def generate_reference_input_config(ensembl_dir: str = "ensembl_genomes",
                     else:
                         print(f'No {file_type} is found in {species_dir}')
                 if 'ensembl' in genome_base:
-                    source = f"{genome_base} {division_dir} {fasta_path.split('/')[-2]}"
+                    source = f"{genome_base} {division_dir} {fasta_path.split('/')[-2]}".replace(' ', '_')
                 elif 'ncbi' in genome_base:
-                    source = f"{genome_base} {fasta_path.split('/')[5]}"
-                    
-                species_name = fasta_path.split('/')[-1].split('.')[0]
-                print(species_name)
+                    source = f"{genome_base} {fasta_path.split('/')[-2]}".replace(' ', '_')
+                
                 config_content.extend([
-                    f'-genome: "{species}"',
+                    f'- genome: "{species}"',
                     f'            fasta: "{fasta_path}"',
                     '\n'.join(lines_to_add),
-                    f'            species: "{species_name}"',
+                    f'            species: "{species}"',
                     f'            source: "{source}"',
                     ])
     
@@ -138,7 +136,7 @@ def main():
                       help='Path to directory containing Ensembl genomes')
     parser.add_argument('--ncbi-dir', default='ncbi_genomes',
                       help='Path to directory containing NCBI genomes')
-    parser.add_argument('--output-file', default='references.config',
+    parser.add_argument('--output-file', default='references.yml',
                       help='Output config file path')
     parser.add_argument('--file-types', type=json.loads, 
                       default='{"gtf": ".gtf", "readme": "README"}',

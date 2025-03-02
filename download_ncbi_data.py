@@ -4,12 +4,75 @@ import json
 import time
 import random
 import zipfile
+import hashlib
+import logging
 import argparse
 import subprocess
 from pathlib import Path
 from multiprocessing import Pool
 
-def download_genome(species, output_dir, max_retries=3, file_types='genome,gtf'):
+def setup_logging():
+    """Configure logging settings"""
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s'
+    )
+
+def validate_checksum(file_path, expected_md5):
+    """
+    Validate file using MD5 checksum
+    
+    Args:
+        file_path (Path): Path to the file
+        expected_md5 (str): Expected MD5 checksum
+    
+    Returns:
+        bool: True if checksum matches, False otherwise
+    """
+    if not file_path.exists():
+        return False
+        
+    md5_hash = hashlib.md5()
+    with open(file_path, 'rb') as f:
+        # Read file in chunks to handle large files efficiently
+        for chunk in iter(lambda: f.read(4096), b''):
+            md5_hash.update(chunk)
+    return md5_hash.hexdigest() == expected_md5
+
+def get_file_paths(dataset_catalog, file_types):
+    
+    if not dataset_catalog.exists():
+        return {}
+    with open(dataset_catalog, 'r') as json_file:
+        species_accession = json.load(json_file)
+        files_index = None
+        for index, element in enumerate(species_accession['assemblies']):
+            try:
+                list(element.keys()).index('accession')
+                files_index = index
+                break
+            except ValueError:
+                continue
+    
+    base_dir = dataset_catalog.parent
+    files = {}
+    for file in species_accession['assemblies'][files_index]['files']:
+        #only check required files
+        file_type = file['fileType'].lower()
+        if 'fasta' not in file_type and file_type not in file_types:
+            continue
+        if (base_dir / file['filePath']).exists():    
+            files[file_type] = file['filePath']
+    
+    for u_file_type in file_types:
+        if u_file_type not in files.keys() and 'fasta' not in u_file_type:
+            logging.warn(f'No file was found for {u_file_type}')
+            continue
+        
+
+    return files
+    
+def download_genome(species, output_dir, max_retries=3, file_types=['genome', 'gtf']):
     """
     Download genome and GTF files for a given species using NCBI datasets tool
     
@@ -19,74 +82,32 @@ def download_genome(species, output_dir, max_retries=3, file_types='genome,gtf')
         file_types: list of file types to download e.g. genome,gtf,etc
         
     """
-    # Add random delay before starting download
-    delay = random.uniform(1, 5)
-    time.sleep(delay)
-    print(f"\nProcessing {species} (after {delay:.1f}s delay)...")
-    
     # Create species-specific directory
     species_dir = output_dir / species.replace(" ", "_")
     species_dir.mkdir(parents=True, exist_ok=True)
     
     # Check if the file(s) already exist
     dataset_catalog = species_dir / "ncbi_dataset" "/data/dataset_catalog.json"
-    if (dataset_catalog).exists():
-        with open(dataset_catalog, 'r') as json_file:
-            species_accession = json.load(json_file)
-            files_index = None
-            for index, element in enumerate(species_accession['assemblies']):
-                try:
-                    list(element.keys()).index('accession')
-                    files_index = index
-                    break
-                except ValueError:
-                    continue
-            
-            if files_index is None:
-                print('No Accession is found in:', files_index, species_accession['assemblies'], 'Trying to download again.')  
-            else:
-                fasta_file = ''
-                gtf_file = ''
-                fasta = False
-                gtf = False
-                
-                for file in species_accession['assemblies'][files_index]['files']:
-                    file_type = file['fileType']
-                    file_path = file['filePath']
-                    if file_type == 'GENOMIC_NUCLEOTIDE_FASTA':
-                        fasta_file = species_dir / "ncbi_dataset" "/data" / file_path
-                    elif file_type == 'GTF':
-                        gtf_file = species_dir / "ncbi_dataset" "/data" / file_path
-                
-                if fasta_file:
-                    if fasta_file.exists():
-                        fasta = True
-                
-                if gtf_file:
-                    if gtf_file.exists():
-                        gtf = True
-                else: #indicating no annotation is available for this species (GTF is missin in the dataset report)
-                    print(f"No GTF files is avilable for: {species}")
-                    gtf = True
-                
-                if fasta and gtf:
-                    print(f'Files already exist for species: {species}\n{fasta_file} {gtf_file}')
-                    return (species, True)
-                elif fasta and 'gtf' not in file_types:
-                    print(f'Files already exist for species: {species}\n{fasta_file}')
-                    return (species, True)
-                elif gtf and 'genome' not in file_types:
-                    print(f'Files already exist for species: {species}\n{gtf_file}')
-                    return (species, True)
-                else:
-                    print("Files don't exist. Trying to download")
+    md5_path = species_dir / "md5sum.txt"
+    files = []
+    if dataset_catalog.exists():
+        files = get_file_paths(dataset_catalog, file_types)
+        if files:
+            logging.info(f'Files already exist for {species}')
+            return (species, True)
     
     #Download the files
+    # Add random delay before starting download
+    delay = random.uniform(1, 5)
+    time.sleep(delay)
+    logging.info(f"\nProcessing {species} (after {delay:.1f}s delay)...")
+    
     try:
         for attempt in range(max_retries):
-            print(f'Attempt: {attempt}. Downloading: {species} to {species_dir}')
+            logging.info(f'Attempt: {attempt}. Downloading: {species} to {species_dir}')
             # Download genome data using datasets command
-            cmd = f"datasets download genome taxon \"{species}\" --include {file_types} --reference"
+            file_types_to_get = ','.join(file_types).replace('fasta', 'genome')
+            cmd = f"datasets download genome taxon \"{species}\" --include {file_types_to_get} --reference"
             result = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=species_dir)
             if result.returncode == 0:
                 #Unzip downloaded folder that contains the files
@@ -95,20 +116,36 @@ def download_genome(species, output_dir, max_retries=3, file_types='genome,gtf')
                 try:
                     with zipfile.ZipFile(zip_file, 'r') as zip_ref:
                         zip_ref.extractall(extract_path)
-                        # Check if download was successful by looking for the data report
+                        # Validate checksums after extraction
                         if dataset_catalog.exists():
-                            # Clean up zip file
-                            print(f"Successfully downloaded data for {species}")
-                            zip_file.unlink()
-                            return (species, True)
+                            md5_hashes = {'/'.join(x.strip().split(' ')[-1].split('/')[-2:]):x.strip().split(' ')[0]
+                                          for x in open(md5_path, 'r').readlines()}
+                            
+                            files = get_file_paths(dataset_catalog, file_types)
+                            for file_type, file_path in files.items():
+                                files_valid = True
+                                file_full_path = species_dir / "ncbi_dataset" / "data" / file_path
+                                if not validate_checksum(file_full_path, md5_hashes[file_path]):
+                                    logging.warn(f"Checksum validation failed for {file_path}")
+                                    files_valid = False
+                                    break
+                            
+                                if files_valid:
+                                    logging.info(f"Successfully downloaded and validated data for {species}")
+                                    zip_file.unlink()
+                                    return (species, True)
+                                else:
+                                    logging.warn(f"Checksum validation failed for {species}. Retrying...")
+                                    zip_file.unlink()
+                                    continue
                 except zipfile.BadZipFile as e:
-                    print(f'Error in unzipping {species}. Error: {e}')
+                    logging.error(f'Error in unzipping {species}. Error: {e}')
                 except FileNotFoundError as e:
-                    print(f'Error in unzipping {species}. Error: {e}')
+                    logging.error(f'Error in unzipping {species}. Error: {e}')
             else:
-                print(f"Error getting the results (code: {result.returncode}): {cmd}")
+                logging.error(f"Error getting the results (code: {result.returncode}): {cmd}")
     except Exception as e:
-        print(f"Error processing {species}")
+        logging.error(f"Error processing {species}", e)
     #remove directory if empty, no download is made
     try:
         species_dir.rmdir()
@@ -133,7 +170,7 @@ def fetch_ncbi_species(max_species, species_list_file=None, search_term='all', a
             cmd+=' --reference'
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         if result.returncode != 0:
-            print(f"Error fetching species names: {result.stderr}")
+            logging.error(f"Error fetching species names: {result.stderr}")
             return []
         data_sets = result.stdout.split('\n')
         species_list = []
@@ -147,7 +184,7 @@ def fetch_ncbi_species(max_species, species_list_file=None, search_term='all', a
                 if len(species_list) >= max_species:
                     break
     except Exception as e:
-        print(f"An error occurred: {e}")
+        logging.error(f"An error occurred: {e}")
     
     if species_list_file and species_list:
         with open(species_list_file, 'w') as species_list_outfile:
@@ -175,7 +212,7 @@ def main():
                         help="Download species available in NCBI")
     parser.add_argument("-a", "--max_attempts", type=int, default=3,
                         help="Maximum number of attempts to retry download (default: 3)")
-    parser.add_argument("-ft", "--file_types", nargs="+", default=['genome', 'gtf'],
+    parser.add_argument("-ft", "--file_types", nargs="+", default=['fasta', 'gtf'],
                         help="""List of assets to download e.g. genome gtf""")
     
     parser.add_argument("--species_list_file", default="ncbi_species_list.txt", 
@@ -185,7 +222,7 @@ def main():
     parser.add_argument("-p", "--processes", type=int, default=1,
                         help="Number of parallel downloads (default: 1)")
     args = parser.parse_args()
-    
+    setup_logging()
     # Create output directory
     output_dir = Path(args.output)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -199,7 +236,7 @@ def main():
     elif args.search_term or args.download_species:
         species_list = fetch_ncbi_species(args.max_species, args.species_list_file, args.search_term, args.assembly_source, args.reference_only)
     else:
-        print("Please provide either \na) a list of species\nb) a file containing species names or\n c) a search term.")
+        logging.info("Please provide either \na) a list of species\nb) a file containing species names or\n c) a search term.")
 
     if not species_list:
         return []
@@ -211,7 +248,7 @@ def main():
             results = pool.starmap(download_genome, [(spcies, output_dir, args.max_attempts, ','.join(args.file_types)) for spcies in species_list])
     else:
         for spcies in species_list:
-            results.append(download_genome(spcies, output_dir, args.max_attempts, ','.join(args.file_types)))
+            results.append(download_genome(spcies, output_dir, args.max_attempts, args.file_types))
     return results
 
 if __name__ == "__main__":
